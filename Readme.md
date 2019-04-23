@@ -1,5 +1,10 @@
 # Adding predictions to AFL
 
+Link https://www.comp.nus.edu.sg/~mboehme is dead,
+and where can one find your paper?
+Thanks 
+
+
 <pre>
                    american fuzzy lop 2.51b (magic_fuzzer)
 
