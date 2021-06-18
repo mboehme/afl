@@ -3134,7 +3134,7 @@ static u8 save_if_interesting(char** argv, void* mem, u32 len, u8 fault) {
   u8  keeping = 0, res;
 
 
-  /* Keep track of singletons and doubletons */
+  /* Keep track of singletons, doubletons etc. */
   u32 cksum = hash32(trace_bits, MAP_SIZE, HASH_CONST);
 
   struct queue_entry* q = queue;
@@ -3460,10 +3460,16 @@ static void write_stats_file(double bitmap_cvg, double stability, double eps) {
 
   u32 singletons = 0;
   u32 doubletons = 0;
+  u32 tripletons = 0;
+  u32 quadrupletons = 0;
+  u32 quintupletons = 0;
   struct queue_entry* q = queue;
   while (q) {
     if (q->n_fuzz == 1) singletons ++;
     if (q->n_fuzz == 2) doubletons ++;
+    if (q->n_fuzz == 3) tripletons ++;
+    if (q->n_fuzz == 4) quadrupletons ++;
+    if (q->n_fuzz == 5) quintupletons ++;
     q = q->next;
   }
 
@@ -3491,6 +3497,9 @@ static void write_stats_file(double bitmap_cvg, double stability, double eps) {
              "last_hang         : %llu\n"
              "singletons        : %u\n"
              "doubletons        : %u\n"
+	     "tripletons	: %u\n"
+             "quadrupletons     : %u\n"
+             "quintupletons     : %u\n"
              "fuzzability       : %Le\n"
              "total_inputs      : %llu\n"
              "execs_since_crash : %llu\n"
@@ -3504,7 +3513,8 @@ static void write_stats_file(double bitmap_cvg, double stability, double eps) {
              max_depth, current_entry, pending_favored, pending_not_fuzzed,
              queued_variable, stability, bitmap_cvg, unique_crashes,
              unique_hangs, last_path_time / 1000, last_crash_time / 1000,
-             last_hang_time / 1000, singletons, doubletons, fuzzability,
+             last_hang_time / 1000, singletons, doubletons, tripletons,
+	     quadrupletons, quintupletons, fuzzability,
              total_inputs, total_execs - last_crash_execs, exec_tmout,
              use_banner, orig_cmdline);
              /* ignore errors */
@@ -3543,10 +3553,16 @@ static void maybe_update_plot_file(double bitmap_cvg, double eps) {
 
   u32 singletons = 0;
   u32 doubletons = 0;
+  u32 tripletons = 0;
+  u32 quadrupletons = 0;
+  u32 quintupletons = 0;
   struct queue_entry* q = queue;
   while (q) {
     if (q->n_fuzz == 1) singletons ++;
     if (q->n_fuzz == 2) doubletons ++;
+    if (q->n_fuzz == 3) tripletons ++;
+    if (q->n_fuzz == 4) quadrupletons ++;
+    if (q->n_fuzz == 5) quintupletons ++;
     q = q->next;
   }
 
@@ -3637,10 +3653,11 @@ static void maybe_update_plot_file(double bitmap_cvg, double eps) {
   }
 
   fprintf(plot_file, 
-          "%llu, %llu, %u, %u, %u, %u, %0.02f%%, %llu, %llu, %u, %0.02f, %u, %u, %Le, %llu\n",
+          "%llu, %llu, %u, %u, %u, %u, %0.02f%%, %llu, %llu, %u, %0.02f, %u, %u, %u, %u, %u, %Le, %llu\n",
           get_cur_time() / 1000, queue_cycle - 1, current_entry, queued_paths,
           pending_not_fuzzed, pending_favored, bitmap_cvg, unique_crashes,
-          unique_hangs, max_depth, eps, singletons, doubletons, fuzzability,
+          unique_hangs, max_depth, eps, singletons, doubletons, tripletons,
+	  quadrupletons, quintupletons,fuzzability,
           total_inputs); /* ignore errors */
 
   fflush(plot_file);
@@ -4127,6 +4144,9 @@ static void show_stats(void) {
   long double correctness = 1.0;
   u32 singletons = 0;
   u32 doubletons = 0;
+  u32 tripletons = 0;
+  u32 quadrupletons = 0;
+  u32 quintupletons = 0;
   u32 exp_total_paths = queued_paths;
 
   /* Correctness and  Path Coverage */
@@ -4137,6 +4157,9 @@ static void show_stats(void) {
 
       if (q->n_fuzz == 1) singletons ++;
       if (q->n_fuzz == 2) doubletons ++;
+      if (q->n_fuzz == 3) tripletons ++;
+      if (q->n_fuzz == 4) quadrupletons ++;
+      if (q->n_fuzz == 5) quintupletons ++;
 
       q = q->next;
 
@@ -7422,7 +7445,8 @@ EXP_ST void setup_dirs_fds(void) {
   fprintf(plot_file, "# unix_time, cycles_done, cur_path, paths_total, "
                      "pending_total, pending_favs, map_size, unique_crashes, "
                      "unique_hangs, max_depth, execs_per_sec, singletons, "
-                     "doubletons, fuzzability, tests_total\n");
+                     "doubletons, tripletons, quadrupletons, quintupletons, "
+		     "fuzzability, tests_total\n");
                      /* ignore errors */
 
 }
